@@ -1,0 +1,31 @@
+version: "3"
+
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "7000:7000"
+    environment:
+      - NODE_ENV=development
+      - MONGO_URI=mongodb+srv://ameshawahalathanthri:groceryapp12345@cluster0.qgh18yg.mongodb.net/
+      - JWT_SECRET=AgklhsdfioyewrljfhgweohfdQ425456@2020
+      - PORT=7000
+    depends_on:
+      - mongo
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "3000:80"
+    environment:
+      - REACT_APP_API_URL=http://backend:7000
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=ameshawahalathanthri
+      - MONGO_INITDB_ROOT_PASSWORD=groceryapp12345

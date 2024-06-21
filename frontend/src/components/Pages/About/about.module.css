@@ -1,0 +1,44 @@
+.title{
+    font-family: 'Times New Roman', Times, serif;
+}
+
+
+.para{
+    font-size: 20px;
+    font-family: 'Times New Roman', Times, serif;
+}
+.review {
+    font-size: 40px;
+    margin-bottom: 40px;
+    text-align: center;
+    font-family: 'Times New Roman', Times, serif;
+    color: red;
+  }
+
+  .container {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .customer_reviews {
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin: 100px;
+  }
+  
+  .add_review {
+    flex: 1;
+    padding: 5px;
+    size: 10px;
+  }
+  .btn {
+    background-color: #0056b3;
+    color: #fff;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 18px;
+    
+  }
