@@ -2,45 +2,50 @@ pipeline {
     agent any
 
     environment {
-        REPO_URL = 'https://github.com/wasAmesha/DevOps_GroceryApp.git'
         DOCKERHUB_CREDENTIALS = credentials('grocery-app-pass')
     }
 
     stages {
         stage('Checkout') {
             steps {
-                git url: "${REPO_URL}", branch: 'main'
+                git 'https://github.com/wasAmesha/DevOps_GroceryApp.git'
             }
         }
+
         stage('Build Backend Image') {
             steps {
                 script {
-                    docker.build('ameshawas/backend', 'backend')
+                    def backendImage = docker.build('grocery-backend', './backend')
                 }
             }
         }
+
         stage('Build Frontend Image') {
             steps {
                 script {
-                    docker.build('ameshawas/frontend', 'frontend')
+                    def frontendImage = docker.build('grocery-frontend', './frontend')
                 }
             }
         }
+
         stage('Push Images to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'grocery-app-pass') {
-                        docker.image('ameshawas/backend').push('latest')
-                        docker.image('ameshawas/frontend').push('latest')
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIALS') {
+                        docker.image('grocery-backend').push("${env.BUILD_ID}")
+                        docker.image('grocery-frontend').push("${env.BUILD_ID}")
                     }
                 }
             }
         }
+
         stage('Deploy') {
             steps {
                 script {
-                    sh 'docker-compose down'
-                    sh 'docker-compose up -d'
+                    docker.withRegistry('https://index.docker.io/v1/', 'DOCKERHUB_CREDENTIALS') {
+                        docker.image('grocery-backend:${env.BUILD_ID}').run('-d -p 7000:7000')
+                        docker.image('grocery-frontend:${env.BUILD_ID}').run('-d -p 3000:80')
+                    }
                 }
             }
         }
