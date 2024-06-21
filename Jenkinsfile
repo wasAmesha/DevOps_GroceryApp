@@ -29,7 +29,7 @@ pipeline {
         stage('Push Images to DockerHub') {
             steps {
                 script {
-                    docker.withRegistry('https://index.docker.io/v1/', 'dockerhub-credentials-id') {
+                    docker.withRegistry('https://index.docker.io/v1/', 'grocery-app-pass') {
                         docker.image('ameshawas/backend').push('latest')
                         docker.image('ameshawas/frontend').push('latest')
                     }
