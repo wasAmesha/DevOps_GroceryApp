@@ -3,7 +3,6 @@ pipeline {
 
     environment {
         REPO_URL = 'https://github.com/wasAmesha/DevOps_GroceryApp.git'
-        DOCKERHUB_CREDENTIALS = credentials('grocery-app-pass')
     }
 
     stages {
@@ -12,55 +11,40 @@ pipeline {
                 git url: "${REPO_URL}", branch: 'main'
             }
         }
-        stage('Build Backend Image') {
+        stage('Build Docker Frontend Image') {
+            steps {  
+                bat 'docker build -t ameshawas/grocery-app-frontend:%BUILD_NUMBER% .'
+            }
+        }
+        stage('Build Docker Backend Image') {
+            steps {  
+                bat 'docker build -t ameshawas/grocery-app-backend:%BUILD_NUMBER% .'
+            }
+        }
+        stage('Login to Docker Hub') {
             steps {
-                script {
-                    try {
-                        docker.build('ameshawas/backend', 'backend')
-                    } catch (Exception e) {
-                        echo "Failed to build backend image: ${e}"
-                        error "Stopping pipeline"
+                withCredentials([string(credentialsId: 'dockerPassword', variable: 'dockerPassword')]) {
+                    script {
+                        bat "docker login -u ameshawas -p ${dockerPassword}"
                     }
                 }
             }
         }
-        stage('Build Frontend Image') {
+        stage('Push Frontend Image') {
             steps {
-                script {
-                    try {
-                        docker.build('ameshawas/frontend', 'frontend')
-                    } catch (Exception e) {
-                        echo "Failed to build frontend image: ${e}"
-                        error "Stopping pipeline"
-                    }
-                }
+                bat 'docker push ameshawas/grocery-app-frontend:%BUILD_NUMBER%'
             }
         }
-        stage('Push Images to DockerHub') {
+        stage('Push Backend Image') {
             steps {
-                script {
-                    try {
-                        docker.withRegistry('https://index.docker.io/v1/', 'grocery-app-pass') {
-                            docker.image('ameshawas/backend').push('latest')
-                            docker.image('ameshawas/frontend').push('latest')
-                        }
-                    } catch (Exception e) {
-                        echo "Failed to push images to DockerHub: ${e}"
-                        error "Stopping pipeline"
-                    }
-                }
+                bat 'docker push ameshawas/grocery-app-backend:%BUILD_NUMBER%'
             }
         }
         stage('Deploy') {
             steps {
                 script {
-                    try {
                         sh 'docker-compose down'
                         sh 'docker-compose up -d'
-                    } catch (Exception e) {
-                        echo "Failed to deploy: ${e}"
-                        error "Stopping pipeline"
-                    }
                 }
             }
         }
